@@ -1,0 +1,117 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.pyplot import MultipleLocator
+from matplotlib.legend_handler import HandlerTuple
+import matplotlib.ticker as mticker
+
+matplotlib.rcParams['font.family'] = "Times New Roman"
+
+#fig,ax = plt.subplots()
+ax = plt.figure(figsize=(5,4))
+
+ax.subplots_adjust(left=0.12,bottom=0.12,right=0.97,top=0.97)
+
+#fig,ax = plt.subplots()
+
+tempax = plt.subplot(1,1,1)
+
+#plt.rcParams["font.family"] = "Times New Roman"
+#plt.rcParams["axes.linewidth"] = 0.6
+#plt.rcParams["xtick.major.width"] = 1.6
+#plt.rcParams["xtick.direction"] = 'out'
+#plt.rcParams["ytick.major.width"] = 1.6
+#plt.rcParams["ytick.direction"] = 'in'
+
+
+qmc = []
+dmrg = []
+
+qmc.append( np.loadtxt("0.125dopingqmc_pbc.dat") )
+dmrg.append(  np.loadtxt("0.125dopingdmrg_pbc.dat") )
+
+qmc.append( np.loadtxt("0.125dopingqmc_apbc.dat") )
+dmrg.append(  np.loadtxt("0.125dopingdmrg_apbc.dat") )
+
+qmc.append( np.loadtxt("0.2dopingqmc_pbc.dat") )
+dmrg.append(  np.loadtxt("0.2dopingdmrg_pbc.dat") )
+
+qmc.append( np.loadtxt("0.2dopingqmc_apbc.dat") )
+dmrg.append(  np.loadtxt("0.2dopingdmrg_apbc.dat") )
+
+
+
+tempax.plot([0,42],[1.0,1.0],linestyle='-.',color='grey',linewidth=0.5)
+
+
+
+#print(data1[0,0]+data1[0,1]*0.01,data1[0,2])
+
+tempax.text(5,0.35,"1/8 doping",fontsize=12)
+tempax.text(15,0.35,"1/5 doping",fontsize=12)
+
+
+diff = [0,0,12,12]
+dd = 0.01
+
+markers = ['o','x','o','x']
+
+
+
+cnum = [24,24,30,30]
+plabels = []
+
+for k in range(4):
+    for i,ele in enumerate(qmc[k]):
+        if i==0 and k<2:  
+            p, = tempax.plot(ele[0]+ele[1]*0.01+diff[k], ele[2]-dd, color='r',marker=markers[k],markerfacecolor='none')
+            plabels.append( p ) 
+
+
+        else: 
+            tempax.plot(ele[0]+(ele[1]-cnum[k])*0.02+diff[k], ele[2]-dd, color='r',marker=markers[k],markerfacecolor='none')
+
+    if k==1:
+        p, = tempax.plot(dmrg[k][0]+dmrg[k][1]*0.01+diff[k], dmrg[k][2]+dd, color='b',marker=markers[k],markerfacecolor='none')
+        plabels.append( p )
+        continue
+
+
+    for i,ele in enumerate(dmrg[k]):
+        
+       
+        if i==0 and k<2: 
+            p, = tempax.plot(ele[0]+ele[1]*0.01+diff[k], ele[2]+dd, color='b',marker=markers[k],markerfacecolor='none')
+            plabels.append( p )
+        else: 
+            tempax.plot(ele[0]+(ele[1]-cnum[k])*0.02+diff[k], ele[2]+dd, color='b',marker=markers[k],markerfacecolor='none')
+
+labels = ["4","6","8","12","4","6","8","12"]
+
+xx = [4,6,8,10,4+diff[2],6+diff[2],8+diff[2],10+diff[2]]
+
+
+#print(dir(tempax))
+tempax.set_xticklabels(labels)
+tempax.xaxis.set_major_locator(mticker.FixedLocator(xx))
+
+#tempax.set_xticks(xx)
+
+
+[p1,p2,p3,p4] = plabels
+
+for xxvalue in xx:
+    plt.plot([xxvalue,xxvalue],[0,1.0],color='grey',linewidth=0.3,linestyle='--')
+
+
+tempax.set_xlim([2,10+diff[2]+2])
+tempax.set_ylim([0.31,1.09])
+tempax.set_xlabel("Ly",fontsize=12)
+tempax.set_ylabel("stripe filling",fontsize=12)
+
+
+plt.legend([(p1,p3),(p2,p4)],["QMC","DMRG"],handler_map={tuple: HandlerTuple(ndivide=None)}, bbox_to_anchor=(0.35, 0.4)  )
+plt.savefig("filling_all.pdf")
+         
+            
+        

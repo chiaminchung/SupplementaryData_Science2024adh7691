@@ -1,0 +1,131 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib
+from matplotlib.pyplot import MultipleLocator
+
+ax = plt.figure(figsize=(5,4))
+
+ax.subplots_adjust(left=0.13,bottom=0.12,right=0.88,top=0.97,hspace=0,wspace=0)
+
+
+spincolor = "k"
+#holecolor = "b"
+dmrgspin = "r"
+
+plt.rcParams["font.family"] = "Times New Roman"
+plt.rcParams["axes.linewidth"] = 0.6
+plt.rcParams["xtick.major.width"] = 1.6
+plt.rcParams["xtick.direction"] = 'out'
+plt.rcParams["ytick.major.width"] = 1.6
+plt.rcParams["ytick.direction"] = 'in'
+
+
+
+words = ["1/2","1/2","1/2","2/3","3/5","2/3","2/3","3/4","2/3"]
+
+Lx = [4,6,8]
+Ly = [16,24,32]
+
+index = 0
+for lx in Lx:
+    for ly in Ly:
+        index += 1
+        tempax = plt.subplot(3,3,index)
+#        tempax2 = tempax.twinx()
+
+        
+        data = np.loadtxt("spin"+str(lx)+str(ly)+".dat")
+        datahole = np.loadtxt("hole"+str(lx)+str(ly)+".dat")
+
+        spin = [0]*ly
+        spinerr = [0]*ly
+        hole = [0]*ly
+        holeerr = [0]*ly
+
+        
+        for i in range(ly):
+            temp,temp2 = [],[]
+            for j in range(lx):
+                temp.append(data[i,j])
+                temp2.append(datahole[i,j])
+            ave = np.mean(temp)
+            err = np.std(temp)/(lx**0.5)
+            spin[i] = ave
+            spinerr[i] = err
+
+            ave = np.mean(temp2)
+            err = np.std(temp2)/(lx**0.5)
+            hole[i] = ave
+            holeerr[i] = err
+
+
+#        print(spin,spinerr)
+#        print(len(spin),len(spinerr))
+        if (lx==6 and (ly==16 or ly==24)) or (lx==8 and ly==16 ):
+            tempax.text(0,0.23,"*",fontsize=20)
+
+
+
+        tempax.text(ly//3,0.28,str(ly)+r"$\times$"+str(lx),fontsize=11)
+        tempax.text(ly*4//10+1,-0.35,words[index-1] ,fontsize=11)
+
+        tempax.errorbar(range(1,ly+1),spin,spinerr,color=spincolor,linewidth=1.0,marker='o',markersize=1)
+#        tempax2.errorbar(range(1,ly+1),hole,holeerr,color=holecolor,linewidth=0.4,marker='o',markersize=1)
+
+        if lx<=6:
+            dmrg = np.loadtxt("dmrg"+str(lx)+str(ly)+".dat")[::lx]
+            for i in range(ly):  dmrg[i,3] *= (-1)**(i+1)
+            tempax.plot(range(1,ly+1),dmrg[:,3],color=dmrgspin,linewidth=1.0,linestyle='--',marker='+',markersize=1)
+#            if lx==4: tempax2.plot(range(1,ly+1),dmrg[:,2],color='royalblue',linewidth=0.3,linestyle='--',marker='+',markersize=1)
+            
+
+
+        tempax.plot(range(-5,ly+5),[0]*(ly+10),color='grey',linestyle='--',linewidth=0.1)
+
+        tempax.set_ylim([-0.39,0.39])
+        tempax.set_xlim([-(ly//10),ly+ly//10])
+
+#        tempax2.set_ylim([0.02,0.199])
+
+#        tempax2.set_xlim([-(ly//10),ly+ly//10])
+
+        if lx==8:
+            tempax.xaxis.set_major_locator(MultipleLocator(ly//4))
+            tempax.tick_params(axis='x',labelsize=11)
+        if ly>16: 
+            tempax.tick_params(axis='y',labelsize=0,colors='white')
+        else:
+            tempax.yaxis.set_major_locator(MultipleLocator(0.2)) 
+            tempax.tick_params(axis='y',labelsize=11,colors='k')
+#            tempax2.spines['left'].set_edgecolor(spincolor)
+
+
+#        if ly<32: 
+#            tempax2.tick_params(axis='y',labelsize=0, colors='white')
+#        else: 
+#            tempax2.tick_params(axis='y',labelsize=11,colors=holecolor)
+#            tempax2.spines['right'].set_color(holecolor)
+
+
+
+
+
+        if lx==6 and ly==16:  tempax.set_ylabel(r"$(-1)^{x+y} S_z(x,y)$",color='k',fontsize=15)
+#        if lx==6 and ly==32:  tempax2.set_ylabel("hole density",color=holecolor,fontsize=15)
+
+        if lx==8 and ly==24:  tempax.set_xlabel("x",fontsize=16)
+#        if lx==4 and ly==24:  tempax.set_title("1/8 hole doping", fontsize=14)
+  #      plt.savefig(str(lx)+str(ly)+".pdf")
+
+
+#plt.text(0,0,"6"+r"$\times$"+"20")
+
+#plt.legend()
+
+
+
+
+plt.savefig("stripe_overall_2.pdf")
+         
+            
+        
